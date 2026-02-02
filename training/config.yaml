@@ -1,0 +1,107 @@
+# Training Configuration for Sentrl AI Agent Platform
+
+# Model Configuration
+model:
+  base_model: deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B
+  device: mps  # Options: mps (Apple Silicon), cuda, cpu
+  trust_remote_code: true
+
+# LoRA Configuration (Parameter-Efficient Fine-Tuning)
+lora:
+  r: 16                   # Rank of LoRA matrices
+  alpha: 32               # LoRA scaling parameter
+  dropout: 0.05           # Dropout probability
+  bias: none              # Bias training: 'none', 'all', 'lora_only'
+  task_type: CAUSAL_LM    # Task type
+  target_modules:         # Modules to apply LoRA
+    - self_attn.q_proj
+    - self_attn.k_proj
+    - self_attn.v_proj
+    - self_attn.o_proj
+    - mlp.gate_proj
+    - mlp.up_proj
+    - mlp.down_proj
+
+# Training Hyperparameters
+training:
+  # Batch configuration
+  per_device_train_batch_size: 1
+  per_device_eval_batch_size: 1
+  gradient_accumulation_steps: 16
+
+  # Learning rate
+  learning_rate: 2e-4
+  warmup_ratio: 0.03
+  lr_scheduler_type: cosine
+  weight_decay: 0.01
+  max_grad_norm: 0.3
+
+  # Training duration
+  num_train_epochs: 3
+  max_steps: -1           # -1 means use num_train_epochs
+
+  # Sequence length
+  max_length: 1024
+
+  # Evaluation & Saving
+  evaluation_strategy: steps
+  eval_steps: 100
+  save_strategy: steps
+  save_steps: 100
+  save_total_limit: 3
+  load_best_model_at_end: true
+  metric_for_best_model: eval_loss
+
+  # Logging
+  logging_strategy: steps
+  logging_steps: 10
+  report_to: []           # Options: ['wandb', 'tensorboard', 'none']
+
+  # Early Stopping
+  early_stopping_patience: 3
+  early_stopping_threshold: 0.01
+
+  # Memory optimization
+  gradient_checkpointing: true
+  optim: adamw_torch
+  group_by_length: true
+  dataloader_pin_memory: false  # Set to false for MPS
+
+# Dataset Configuration
+dataset:
+  format: alpaca          # alpaca or oai-chat
+  test_size: 0.2
+  val_size: 0.1
+  random_seed: 42
+
+# System Prompts
+prompts:
+  system: |
+    You are a personal AI assistant that learns from observing user actions.
+    Analyze the user's workflow and provide helpful descriptions based on their patterns.
+
+  instruction_template: |
+    Based on the following user action and context, describe what the user is trying to accomplish:
+
+    Action: {action}
+    Window: {window}
+    Screenshot: <image>
+
+    Provide:
+    1. The immediate task being performed
+    2. The broader workflow this is part of
+    3. The likely goal the user is working toward
+
+# Output Configuration
+output:
+  base_dir: training/models
+  checkpoint_dir: training/models/checkpoints
+  adapter_dir: training/models/adapters
+  run_name: null          # Auto-generated if null
+
+# Weights & Biases (Optional)
+wandb:
+  enabled: false
+  project: sentrl-agent-training
+  entity: null
+  tags: []

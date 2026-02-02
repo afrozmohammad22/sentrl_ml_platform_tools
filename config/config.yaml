@@ -1,0 +1,96 @@
+# Sentrl AI Agent Platform Configuration
+
+# Data paths
+data:
+  root_dir: ~/sentrl_data  # Main data directory
+  session_format: "session_%Y%m%d_%H%M%S"  # Session directory naming
+
+# Action Logger Settings
+logger:
+  screenshot_format: png
+  scroll_timeout: 0.3  # seconds to wait before capturing scroll screenshot
+  capture_on_events:
+    - click
+    - enter_key
+    - tab_key
+    - window_change
+
+# Vision Model Configuration (Ollama)
+vision:
+  model: llama3.2-vision  # Model name in Ollama
+  endpoint: http://localhost:11434/api/generate
+  temperature: 0.5
+  batch_size: 1
+  timeout: 60  # seconds
+
+# Training Configuration
+training:
+  # Base model for fine-tuning
+  base_model: deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B
+
+  # Device selection
+  device: mps  # Options: mps (Apple Silicon), cuda, cpu
+
+  # LoRA Configuration
+  lora:
+    r: 16
+    alpha: 32
+    dropout: 0.05
+    target_modules:
+      - self_attn.q_proj
+      - self_attn.k_proj
+      - self_attn.v_proj
+      - self_attn.o_proj
+      - mlp.gate_proj
+      - mlp.up_proj
+      - mlp.down_proj
+
+  # Training Hyperparameters
+  hyperparameters:
+    batch_size: 1
+    gradient_accumulation_steps: 16
+    learning_rate: 2e-4
+    num_epochs: 3
+    max_length: 1024
+    warmup_ratio: 0.03
+    weight_decay: 0.01
+    max_grad_norm: 0.3
+
+    # Evaluation
+    eval_steps: 100
+    save_steps: 100
+    logging_steps: 10
+
+    # Early stopping
+    early_stopping_patience: 3
+    early_stopping_threshold: 0.01
+
+  # Dataset Configuration
+  dataset:
+    test_size: 0.2
+    validation_size: 0.1  # From remaining after test split
+    random_seed: 42
+
+  # Output Directories
+  output_dir: training/models
+  checkpoint_dir: training/models/checkpoints
+  adapter_dir: training/models/adapters
+
+  # Optional: Weights & Biases
+  use_wandb: false
+  wandb_project: sentrl-agent-training
+
+# System Prompt Template for Training
+prompts:
+  system: "You are a personal AI assistant that learns from observing user actions. Analyze the user's workflow and provide helpful suggestions based on their patterns."
+  instruction_template: |
+    Based on the following user action and context, describe what the user is trying to accomplish:
+
+    Action: {action}
+    Window: {window}
+    Screenshot: <image>
+
+    Provide:
+    1. The immediate task being performed
+    2. The broader workflow this is part of
+    3. The likely goal the user is working toward

@@ -1,0 +1,42 @@
+# Sentrl AI Agent Platform - Dependencies
+# Python >=3.10 required
+
+# PyTorch (MPS support for Apple Silicon)
+torch>=2.1.0
+torchvision>=0.16.0
+
+# Transformers & Training
+transformers>=4.36.0
+peft>=0.7.0              # LoRA adapters
+datasets>=2.14.0         # HuggingFace datasets
+accelerate>=0.24.0       # Training acceleration
+
+# Action Logger (macOS)
+pynput>=1.7.6           # Keyboard/mouse events
+pyautogui>=0.9.53       # Screenshots
+opencv-python>=4.8.0    # Image processing
+numpy>=1.24.0           # Array operations
+pyobjc-framework-Cocoa  # macOS window info
+
+# Vision Annotator
+PyQt6>=6.5.0            # GUI framework
+Pillow>=10.0.0          # Image processing
+requests>=2.31.0        # HTTP requests for Ollama
+
+# Data Processing
+scikit-learn>=1.3.0     # Train/test splits
+jsonlines>=4.0.0        # JSONL format handling
+pandas>=2.0.0           # Data manipulation
+
+# Configuration
+PyYAML>=6.0.0           # Config file parsing
+python-dotenv>=1.0.0    # Environment variables
+
+# Optional
+wandb>=0.15.0           # Training metrics (optional)
+psutil>=5.9.0           # Memory monitoring
+tensorboard>=2.14.0     # Training visualization (optional)
+
+# Development (optional)
+pytest>=7.0.0           # Testing
+black>=23.0.0           # Code formatting
